@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2 # 🚀 ON VEUT 2 COPIES DU BACKEND ! (Scaling)
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          # 👇 REMPLACE 'VOTRE_PSEUDO' PAR TON NOM DOCKER HUB
+          image: kshchaimae2004/crud-backend:latest 
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            # Configuration de la base de données
+            - name: SPRING_DATASOURCE_URL
+              # "postgres-service" sera le nom défini dans le fichier services.yaml plus bas
+              value: jdbc:postgresql://postgres-service:5432/crud_db 
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "1234"

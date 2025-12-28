@@ -1,0 +1,47 @@
+# --- Partie 1 : Le Stockage Persistant (Le Disque Dur) ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc # Le nom de notre "ticket de réclamation" de stockage
+spec:
+  accessModes:
+    - ReadWriteOnce # Un seul noeud peut écrire dessus (classique)
+  resources:
+    requests:
+      storage: 512Mi # On demande 512 Mo d'espace disque
+
+---
+# --- Partie 2 : Le Deployment (Le Logiciel) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1 # Une seule base de données (jamais plus pour une SQL classique !)
+  selector:
+    matchLabels:
+      app: postgres # Ce deployment gère les pods étiquetés "postgres"
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15 # On prend l'image officielle (pas besoin de ton pseudo)
+          ports:
+            - containerPort: 5432
+          env: # Les variables d'environnement (comme dans docker-compose)
+            - name: POSTGRES_DB
+              value: crud_db
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: "1234" # ⚠️ Idéalement, on utilise un Secret ici
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data # Où Postgres stocke ses données dans le conteneur
+              name: postgres-storage
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc # On branche le disque dur créé au début

@@ -1,3 +1,14 @@
+## 🚀 How to run
+
+### Option 1: Docker Compose (Local Development)
+```bash
+docker-compose up --build
+### Option 2: kubernetes 
+kubectl apply -f k8s/
+
+
+
+
 # crud
 
 CRUD Application using React and Spring Boot

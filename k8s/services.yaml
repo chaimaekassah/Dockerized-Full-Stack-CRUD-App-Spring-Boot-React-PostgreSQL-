@@ -1,0 +1,43 @@
+# --- Service 1 : Pour la Base de Données (Interne uniquement) ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service # ⚠️ Ce nom est CRUCIAL, c'est celui utilisé dans le Backend !
+spec:
+  selector:
+    app: postgres # Il redirige vers les pods "postgres"
+  ports:
+    - protocol: TCP
+      port: 5432 # Port du service
+      targetPort: 5432 # Port du pod
+  type: ClusterIP # Accessible uniquement à l'intérieur du cluster (sécurité)
+
+---
+# --- Service 2 : Pour le Backend (Accessible depuis ton PC) ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8081      # Port accessible depuis l'extérieur (localhost:8081)
+      targetPort: 8081 # Port du conteneur Spring Boot
+  type: LoadBalancer # Permet d'accéder via localhost sur Docker Desktop
+
+---
+# --- Service 3 : Pour le Frontend (Accessible depuis ton PC) ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 3000      # Tu taperas localhost:3000 dans ton navigateur
+      targetPort: 80  # Ça redirige vers le port 80 de Nginx
+  type: LoadBalancer
