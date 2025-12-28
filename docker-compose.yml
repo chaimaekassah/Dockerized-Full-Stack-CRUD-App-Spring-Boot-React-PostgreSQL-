@@ -1,0 +1,40 @@
+services:
+  # --- Service 1 : Base de données ---
+  postgres:
+    image: postgres:15
+    container_name: mabd_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234 # <--- METS TON VRAI MOT DE PASSE ICI
+      POSTGRES_DB: crud_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- Service 2 : Backend (Spring Boot) ---
+  backend:
+    build: ./backend/crud-application
+    container_name: mon_backend
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    environment:
+      # On connecte le backend au service "postgres" (et non localhost)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/crud_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234 # <--- LE MÊME MOT DE PASSE QU'EN HAUT
+      SERVER_PORT: 8081
+
+  # --- Service 3 : Frontend (React) ---
+  frontend:
+    build: ./frontend/crudfront
+    container_name: mon_frontend
+    ports:
+      - "3000:80" # On map le port 3000 de ton PC vers le 80 de Nginx
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
